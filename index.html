@@ -848,6 +848,42 @@
             name: "Kahani Vocabs",
             description: "Kahani-Kahani Mein 1000 Vocabulary",
             order_id: data.order_id,
+            prefill: {
+                name: name,
+                email: email
+            },
+            handler: function (paymentResponse) {
+                alert("Payment successful!");
+                console.log(paymentResponse);
+            }
+        };
+
+        const razorpay = new Razorpay(options);
+        razorpay.open();
+
+    } catch (error) {
+        console.error(error);
+        alert("Unable to start payment. Please try again.");
+    }
+}
+
+        if (typeof Razorpay === "undefined") {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement("script");
+                script.src = "https://checkout.razorpay.com/v1/checkout.js";
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        const options = {
+            key: data.key_id,
+            amount: data.amount,
+            currency: data.currency,
+            name: "Kahani Vocabs",
+            description: "Kahani-Kahani Mein 1000 Vocabulary",
+            order_id: data.order_id,
 
             prefill: {
                 name: name,
