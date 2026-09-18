@@ -81,11 +81,16 @@ export default async function handler(req, res) {
 
         const data = await response.json();
 
-        if (!response.ok) {
-            console.error("Razorpay error:", data);
+      if (!response.ok) {
+    console.error("Razorpay error:", data);
 
-            return res.status(response.status).json(data);
-        }
+    return res.status(response.status).json({
+        error:
+            data?.error?.description ||
+            data?.error?.reason ||
+            JSON.stringify(data)
+    });
+}
 
         return res.status(200).json({
             order_id: data.id,
