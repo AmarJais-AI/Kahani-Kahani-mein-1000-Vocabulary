@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Your E-Book | Kahani-Kahani Mein Vocabulary</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #0b1120;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    .topbar {
+      height: 64px;
+      background: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      border-bottom: 1px solid #374151;
+    }
+
+    .title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .status {
+      font-size: 12px;
+      color: #34d399;
+    }
+
+    #reader {
+      width: 100%;
+      height: calc(100vh - 64px);
+      border: none;
+      display: none;
+      background: white;
+    }
+
+    .loading {
+      height: calc(100vh - 64px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 25px;
+    }
+
+    .box {
+      max-width: 420px;
+    }
+
+    .icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .message {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #d1d5db;
+    }
+
+    .error {
+      color: #f87171;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 11px 18px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <div class="title">📚 Kahani-Kahani Mein 1000 Vocabulary</div>
+    <div class="status">✓ Paid Access</div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="box">
+      <div class="icon">📖</div>
+
+      <div class="message" id="message">
+        Verifying your e-book access...
+      </div>
+    </div>
+  </div>
+
+  <iframe
+    id="reader"
+    allow="fullscreen"
+    loading="lazy">
+  </iframe>
+
+  <script>
+    const API_BASE =
+      "https://kahani-kahani-mein-1000-vocabulary.vercel.app";
+
+    async function openBook() {
+      const token =
+        sessionStorage.getItem("ebook_access_token");
+
+      if (!token) {
+        showError(
+          "Your e-book access session was not found. Please complete the payment again."
+        );
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          API_BASE + "/api/ebook-access",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              access_token: token
+            })
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          sessionStorage.removeItem("ebook_access_token");
+
+          showError(
+            data.error ||
+            "Your e-book access could not be verified."
+          );
+
+          return;
+        }
+
+        let driveUrl = data.ebook_url;
+
+        /*
+          Convert Google Drive:
+          /file/d/FILE_ID/view
+          into:
+          /file/d/FILE_ID/preview
+        */
+
+        const match = driveUrl.match(
+          /drive\.google\.com\/file\/d\/([^/]+)/
+        );
+
+        if (!match) {
+          showError(
+            "The e-book link is not configured correctly."
+          );
+          return;
+        }
+
+        const fileId = match[1];
+
+        const previewUrl =
+          "https://drive.google.com/file/d/" +
+          fileId +
+          "/preview";
+
+        document.getElementById("reader").src = previewUrl;
+
+        document.getElementById("loading").style.display =
+          "none";
+
+        document.getElementById("reader").style.display =
+          "block";
+
+      } catch (error) {
+        console.error(error);
+
+        showError(
+          "Unable to connect to the e-book server. Please try again."
+        );
+      }
+    }
+
+    function showError(message) {
+      document.getElementById("message").innerHTML =
+        '<span class="error">' +
+        message +
+        '</span>' +
+        '<br>' +
+        '<a class="back-btn" href="index.html">' +
+        '← Back to Website' +
+        '</a>';
+
+      document.querySelector(".icon").textContent = "⚠️";
+    }
+
+    openBook();
+  </script>
+
+</body>
+</html>
