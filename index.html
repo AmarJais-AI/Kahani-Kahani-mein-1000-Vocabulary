@@ -888,15 +888,58 @@
             color: "#2563eb"
           },
 
-          handler: function(paymentResponse) {
-            console.log("Razorpay payment successful:", paymentResponse);
+          handler: async function(paymentResponse) {
+  console.log("Razorpay payment successful:", paymentResponse);
 
-            alert(
-              "Payment successful!\n\n" +
-              "Payment ID: " + paymentResponse.razorpay_payment_id +
-              "\n\nYour payment has been received."
-            );
-          },
+  try {
+    const verifyResponse = await fetch(
+      "https://kahani-kahani-mein-1000-vocabulary.vercel.app/api/verify-payment",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          razorpay_order_id: paymentResponse.razorpay_order_id,
+          razorpay_payment_id: paymentResponse.razorpay_payment_id,
+          razorpay_signature: paymentResponse.razorpay_signature,
+          name: name,
+          email: email
+        })
+      }
+    );
+
+    const result = await verifyResponse.json();
+
+    if (!verifyResponse.ok || !result.success) {
+      throw new Error(
+        result.error || "Payment verification failed."
+      );
+    }
+
+    sessionStorage.setItem(
+      "ebook_access_token",
+      result.access_token
+    );
+
+    window.location.href = "reader.html";
+
+  } catch (error) {
+    console.error("Verification error:", error);
+
+    alert(
+      "Payment was received, but access verification failed.\n\n" +
+      "Please contact support with your payment ID:\n" +
+      paymentResponse.razorpay_payment_id
+    );
+
+    if (payButton) {
+      payButton.disabled = false;
+      payButton.textContent =
+        "🔒 Pay Securely & Get Online Access";
+    }
+  }
+},
 
           modal: {
             ondismiss: function() {
