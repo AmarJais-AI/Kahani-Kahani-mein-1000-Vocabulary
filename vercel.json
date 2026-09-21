@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/page.js": {
-      "includeFiles": "protected-book.dat"
-    }
-  }
-}
