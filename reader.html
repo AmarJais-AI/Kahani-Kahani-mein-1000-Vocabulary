@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your E-Book | Kahani-Kahani Mein Vocabulary</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;padding:0;background:#0b1120;color:#fff;font-family:Arial,sans-serif;min-height:100%}
+.topbar{min-height:64px;background:#111827;border-bottom:1px solid #374151;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:12px;position:sticky;top:0;z-index:10}.title{font-size:15px;font-weight:700}.status{font-size:12px;color:#34d399;white-space:nowrap}
+.loading{min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;text-align:center;padding:30px}.box{max-width:480px}.icon{font-size:48px;margin-bottom:15px}.message{font-size:16px;line-height:1.6;color:#d1d5db}.error{color:#f87171}.btn{display:inline-block;margin:18px 8px 0 8px;padding:12px 18px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;font-weight:700;border:0;cursor:pointer}.secondary{background:#374151}
+.reader{display:none;max-width:1200px;margin:0 auto;padding:12px 12px 30px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 12px}.actions .btn{margin:0}.pdf-frame{width:100%;height:calc(100vh - 135px);min-height:650px;border:0;background:#fff;border-radius:6px}
+.note{font-size:12px;color:#9ca3af;margin-top:8px;line-height:1.5}
+@media(max-width:600px){.title{font-size:14px}.pdf-frame{height:calc(100vh - 175px);min-height:520px}.actions{justify-content:center}.btn{padding:11px 14px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="title">📚 Kahani-Kahani Mein 1000 Vocabulary</div>
+  <div class="status">✓ Paid Access</div>
+</div>
+
+<div id="loading" class="loading">
+  <div class="box">
+    <div class="icon">📖</div>
+    <div class="message" id="message">Verifying your e-book access...</div>
+  </div>
+</div>
+
+<main id="reader" class="reader">
+  <div class="actions">
+    <a id="openBtn" class="btn" href="#" target="_blank" rel="noopener">📖 Open PDF</a>
+    <a id="downloadBtn" class="btn" href="#" target="_blank" rel="noopener">⬇ Download PDF</a>
+  </div>
+  <iframe id="pdfFrame" class="pdf-frame" title="Kahani-Kahani Mein 1000 Vocabulary"></iframe>
+  <div class="note">For the best reading experience, use “Open PDF” or “Download PDF”.</div>
+</main>
+
+<script>
+const API = "https://kahani-kahani-mein-1000-vocabulary.vercel.app";
+const TOKEN_KEY = "ebook_access_token";
+
+async function openBook() {
+  const token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+
+  if (!token) {
+    showError("Your e-book access session was not found. Please complete the payment again.");
+    return;
+  }
+
+  try {
+    const response = await fetch(API + "/api/ebook-access", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ access_token: token })
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data.success || !data.ebook_url) {
+      localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(TOKEN_KEY);
+      showError(data.error || "Your e-book access could not be verified.");
+      return;
+    }
+
+    const driveUrl = data.ebook_url;
+    const match = driveUrl.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+
+    if (!match) {
+      showError("The e-book link is not configured correctly.");
+      return;
+    }
+
+    const fileId = match[1];
+    const previewUrl = "https://drive.google.com/file/d/" + fileId + "/preview";
+    const downloadUrl = "https://drive.google.com/uc?export=download&id=" + encodeURIComponent(fileId);
+
+    document.getElementById("pdfFrame").src = previewUrl;
+    document.getElementById("openBtn").href = previewUrl;
+    document.getElementById("downloadBtn").href = downloadUrl;
+
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("reader").style.display = "block";
+  } catch (error) {
+    console.error(error);
+    showError("Unable to connect to the e-book server. Please try again.");
+  }
+}
+
+function showError(message) {
+  document.getElementById("message").innerHTML =
+    '<span class="error">' + message + '</span><br>' +
+    '<a class="btn secondary" href="index.html">← Back to Website</a>';
+}
+
+openBook();
+</script>
+</body>
+</html>
