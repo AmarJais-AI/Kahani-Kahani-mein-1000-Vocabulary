@@ -782,25 +782,35 @@
     }
 
     let payableAmount = 199;
-    let couponApplied = false;
+    let couponApplied = false; let couponCode = "";
 
-    function applyCoupon() {
-      const code = document.getElementById("couponInput").value.trim().toUpperCase();
-      const msg = document.getElementById("couponMessage");
-      if (code === "WELCOME50") {
-        couponApplied = true;
-        payableAmount = 99.50;
-        document.getElementById("finalPrice").textContent = "₹99.50";
-        msg.textContent = "✓ 50% discount applied. Valid for the first 50 successful uses.";
-        msg.style.color = "#34d399";
-      } else {
-        couponApplied = false;
-        payableAmount = 199;
-        document.getElementById("finalPrice").textContent = "₹199";
-        msg.textContent = code ? "Invalid coupon code." : "";
-        msg.style.color = "#f87171";
-      }
-    }
+   function applyCoupon() {
+  const code = document.getElementById("couponInput").value.trim().toUpperCase();
+  const msg = document.getElementById("couponMessage");
+
+  if (code === "WELCOME50") {
+    couponApplied = true;
+    couponCode = "WELCOME50";
+    payableAmount = 99.50;
+    document.getElementById("finalPrice").textContent = "₹99.50";
+    msg.textContent = "✓ 50% discount applied. Lifetime access.";
+    msg.style.color = "#34d399";
+  } else if (code === "AMAR75") {
+    couponApplied = true;
+    couponCode = "AMAR75";
+    payableAmount = 49.75;
+    document.getElementById("finalPrice").textContent = "₹49.75";
+    msg.textContent = "✓ Special price applied. 1-year online access.";
+    msg.style.color = "#34d399";
+  } else {
+    couponApplied = false;
+    couponCode = "";
+    payableAmount = 199;
+    document.getElementById("finalPrice").textContent = "₹199";
+    msg.textContent = code ? "Invalid coupon code." : "";
+    msg.style.color = "#f87171";
+  }
+}
 
     function startPayment() {
       const name = document.getElementById("buyerName").value.trim();
@@ -825,7 +835,7 @@
         body: JSON.stringify({
           name: name,
           email: email,
-          coupon: couponApplied ? "WELCOME50" : ""
+          coupon: couponCode
         })
       })
       .then(function(response) {
@@ -881,7 +891,7 @@
 
           notes: {
             product: "Kahani-Kahani Mein 1000 Vocabulary",
-            coupon: couponApplied ? "WELCOME50" : "NONE"
+            coupon: couponCode || "NONE"
           },
 
           theme: {
