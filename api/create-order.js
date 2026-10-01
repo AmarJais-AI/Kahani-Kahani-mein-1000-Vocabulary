@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
 
     let amount = 9900;
 
-    // WELCOME50: normal ₹99 order with the existing Razorpay 50% offer.
+    // WELCOME50: normal ₹49.75 order with the existing Razorpay 50% offer.
     // AMAR75: direct ₹24.75 order.
     if (coupon === "AMAR75") {
       amount = 2475;
