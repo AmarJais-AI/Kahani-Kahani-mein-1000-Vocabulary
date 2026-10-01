@@ -1,6 +1,5 @@
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID;
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
-const WELCOME50_OFFER_ID = "offer_TcJ6j2zmNLbkRa";
 const ALLOWED_ORIGIN = "https://amarjais-ai.github.io";
 
 function cors(res) {
@@ -25,14 +24,17 @@ module.exports = async (req, res) => {
     const name = String(body.name || "").trim().slice(0, 100);
     const email = String(body.email || "").trim().slice(0, 150);
 
-    let amount = 9900;
+  let amount = 9900;
 
-    // WELCOME50: normal ₹99 order with the existing Razorpay 50% offer.
-    // AMAR75: direct ₹24.75 order.
-    if (coupon === "AMAR75") {
-      amount = 2475;
-    }
+// WELCOME50: 50% off ₹99 = ₹49.50
+if (coupon === "WELCOME50") {
+  amount = 4950;
+}
 
+// AMAR75: 75% off ₹99 = ₹24.75
+if (coupon === "AMAR75") {
+  amount = 2475;
+}
     const order = {
       amount,
       currency: "INR",
@@ -44,11 +46,6 @@ module.exports = async (req, res) => {
         coupon: coupon === "WELCOME50" || coupon === "AMAR75" ? coupon : "NONE"
       }
     };
-
-    if (coupon === "WELCOME50") {
-      order.offers = [WELCOME50_OFFER_ID];
-      order.force_offer = true;
-    }
 
     const auth = Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString("base64");
 
