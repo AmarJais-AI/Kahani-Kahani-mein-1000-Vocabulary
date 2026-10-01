@@ -25,12 +25,12 @@ module.exports = async (req, res) => {
     const name = String(body.name || "").trim().slice(0, 100);
     const email = String(body.email || "").trim().slice(0, 150);
 
-    let amount = 19900;
+    let amount = 9900;
 
-    // WELCOME50: normal ₹199 order with the existing Razorpay 50% offer.
-    // AMAR75: direct ₹49.75 order.
+    // WELCOME50: normal ₹99 order with the existing Razorpay 50% offer.
+    // AMAR75: direct ₹24.75 order.
     if (coupon === "AMAR75") {
-      amount = 4975;
+      amount = 2475;
     }
 
     const order = {
